@@ -26,7 +26,7 @@ function App() {
 }
 
 async function populateWeapons() {
-    const resposne = await fetch("api/Weapons");
+    const resposne = await fetch("weapons/count?weaponType=Bow&weaponLevel=100");
     const data = await resposne.json();
     return data;
 }

@@ -1,6 +1,6 @@
 using DestinyVaultSorter;
 
-WeaponDatabase weaponData = new WeaponDatabase();
+//WeaponDatabase weaponData = new WeaponDatabase();
 
 /*
 weaponData.AddNewWeapon(2, "Weapon2", "Shotgun", "Void", 1210);
@@ -38,9 +38,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapGet("/api/Weapons", () => weaponData.databaseSearch());
-
-app.MapFallbackToFile("index.html"); 
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

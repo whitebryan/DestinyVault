@@ -6,6 +6,26 @@ using System.Xml;
 
 namespace DestinyVaultSorter
 {
+    [ApiController]
+    public class DatabaseController
+    {
+        private WeaponDatabase myDatabase = new WeaponDatabase();
+
+        [HttpGet]
+        [Route("/weapons/search/{weaponElement?}/{weaponType?}/{weaponLevel:int?}")]
+        public List<Weapon> weaponSearch([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null)
+        {
+            return myDatabase.databaseSearch(weaponElement, weaponType, weaponLevel);  
+        }
+
+        [HttpGet]
+        [Route("/weapons/count/{weaponElement?}/{weaponType?}/{weaponLevel:int?}")]
+        public int weapoonCount([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null)
+        {
+            return myDatabase.getWeaponCount(weaponElement, weaponType, weaponLevel);
+        }
+    }
+
     public class WeaponDatabase
     {
         public WeaponDatabase() 
@@ -35,10 +55,29 @@ namespace DestinyVaultSorter
             myDatabase.SaveChanges();
         }
 
-        public int getWeaponCount()
+
+        public int getWeaponCount(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null)
         {
-            return myDatabase.Weapons.Count();
+            IQueryable<Weapon> query = myDatabase.Set<Weapon>();
+
+            if (weaponElement != null)
+            {
+                query = query.Where(w => w.weaponElement == weaponElement);
+            }
+
+            if (weaponType != null)
+            {
+                query = query.Where(w => w.weaponType == weaponType);
+            }
+
+            if (weaponLevel != null)
+            {
+                query = query.Where(w => w.weaponLevel >= weaponLevel);
+            }
+
+            return query.Count();
         }
+
 
         public List<Weapon> databaseSearch(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null)
         {
@@ -64,7 +103,6 @@ namespace DestinyVaultSorter
             //return myDatabase.Weapons.FromSqlRaw($"SELECT weaponId FROM Weapons WHERE {columnName} {condition0} {condition1}").ToArray();
             //return myDatabase.Weapons.Where(b => b.weaponId > 0).ToArray();
         }
-
     }
 }
 
