@@ -1,3 +1,20 @@
+using DestinyVaultSorter;
+
+WeaponDatabase weaponData = new WeaponDatabase();
+
+/*
+weaponData.AddNewWeapon(2, "Weapon2", "Shotgun", "Void", 1210);
+weaponData.AddNewWeapon(3, "Weapon3", "Shotgun", "Solar", 1001);
+weaponData.AddNewWeapon(4, "Weapon4", "Shotgun", "Arc", 1050);
+weaponData.AddNewWeapon(5, "Weapon5", "Shotgun", "Strand", 1300);
+weaponData.AddNewWeapon(6, "Weapon6", "Shotgun", "Stasis", 1200);
+weaponData.AddNewWeapon(7, "Weapon7", "Sniper", "Arc", 1210);
+weaponData.AddNewWeapon(8, "Weapon8", "Sniper", "Arc", 1050);
+weaponData.AddNewWeapon(9, "Weapon9", "Bow", "Arc", 1050);
+weaponData.AddNewWeapon(10, "Weapon10", "Bow", "Strand", 1300);
+weaponData.AddNewWeapon(11, "Weapon11", "SMG", "Stasis", 1200);
+*/
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,11 +34,13 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapFallbackToFile("index.html"); ;
+app.MapGet("/api/Weapons", () => weaponData.databaseSearch());
+
+app.MapFallbackToFile("index.html"); 
 
 app.Run();
+
