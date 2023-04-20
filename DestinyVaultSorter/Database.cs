@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml;
 
+[assembly: InternalsVisibleTo("UnitTests")]
 namespace DestinyVaultSorter
 {
     [ApiController]
@@ -33,6 +35,11 @@ namespace DestinyVaultSorter
             myDatabase = new WeaponContext();
         }
 
+        public WeaponDatabase(string dbName)
+        {
+            myDatabase = new WeaponContext(dbName);
+        }
+
         private WeaponContext myDatabase;
 
         public void AddNewWeapon(int id, string weaponName, string weaponType, string element, int weaponLevel)
@@ -51,7 +58,20 @@ namespace DestinyVaultSorter
 
         public void RemoveWeapon(int id) 
         {
-            myDatabase.Remove(id);
+            Weapon? wepToRemove = myDatabase.Find<Weapon>(id);
+
+            if (wepToRemove != null)
+            {
+                myDatabase.Remove(wepToRemove);
+                myDatabase.SaveChanges();
+            }
+        }
+
+        //Only used for unit testing
+        public void clearDatabase()
+        {
+            IQueryable<Weapon> query = myDatabase.Set<Weapon>();
+            myDatabase.RemoveRange(query);
             myDatabase.SaveChanges();
         }
 

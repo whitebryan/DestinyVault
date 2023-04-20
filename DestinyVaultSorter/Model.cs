@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace DestinyVaultSorter
 {
@@ -14,7 +15,14 @@ namespace DestinyVaultSorter
         {
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
-            DbPath = System.IO.Path.Join(path, "blogging.db");
+            DbPath = System.IO.Path.Join(path, "weapons.db");
+        }
+
+        public WeaponContext(string dbName)
+        {
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var path = Environment.GetFolderPath(folder);
+            DbPath = System.IO.Path.Join(path, dbName+".db");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
