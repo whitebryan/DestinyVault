@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using static System.Net.WebRequestMethods;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 namespace DestinyVaultSorter
@@ -26,6 +27,23 @@ namespace DestinyVaultSorter
         {
             return myDatabase.getWeaponCount(weaponElement, weaponType, weaponLevel);
         }
+
+        [HttpGet]
+        [Route("/weapons/icon/{weaponID}")]
+        public string getWeaponIconLink(string weaponID)
+        {
+            int weaponIDNum = Int32.Parse(weaponID);
+            if (weaponIDNum > 0)
+            {
+                Weapon foundWeapon = myDatabase.getWeaponById(weaponIDNum);
+                if(foundWeapon != null)
+                {
+                    return foundWeapon.weaponIconLink;
+                }
+            }
+
+            return "null";
+        }
     }
 
     public class WeaponDatabase
@@ -33,18 +51,20 @@ namespace DestinyVaultSorter
         public WeaponDatabase() 
         {
             myDatabase = new WeaponContext();
+            bungieAPI = new BungieAPIHandler("");//Remove API key before pushing to github
         }
 
-        public WeaponDatabase(string dbName)
+        public WeaponDatabase(string dbName, string APIKey)
         {
             myDatabase = new WeaponContext(dbName);
+            bungieAPI = new BungieAPIHandler(APIKey);
         }
 
         private WeaponContext myDatabase;
-
-        public void AddNewWeapon(int id, string weaponName, string weaponType, string element, int weaponLevel)
+        public BungieAPIHandler bungieAPI;
+        public void AddNewWeapon(Weapon weaponToAdd)
         {
-            myDatabase.Add(new Weapon(id, weaponName, weaponType, element, weaponLevel));
+            myDatabase.Add(weaponToAdd);
 
             try
             {
@@ -122,6 +142,11 @@ namespace DestinyVaultSorter
             //return myDatabase.Weapons.Where(w => w.weaponId > 4).ToArray();
             //return myDatabase.Weapons.FromSqlRaw($"SELECT weaponId FROM Weapons WHERE {columnName} {condition0} {condition1}").ToArray();
             //return myDatabase.Weapons.Where(b => b.weaponId > 0).ToArray();
+        }
+
+        public Weapon? getWeaponById(int id) 
+        {
+            return myDatabase.Find<Weapon>(id);
         }
     }
 }

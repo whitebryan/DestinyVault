@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Button from './components/RoundButton'
@@ -26,7 +26,7 @@ function App() {
 }
 
 async function populateWeapons() {
-    const resposne = await fetch("weapons/count?weaponType=Bow&weaponLevel=100");
+    const resposne = await fetch("weapons/search/");
     const data = await resposne.json();
     return data;
 }

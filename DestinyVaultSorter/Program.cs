@@ -1,7 +1,21 @@
 using DestinyVaultSorter;
+using System.Text.Json.Nodes;
 
-//WeaponDatabase weaponData = new WeaponDatabase();
+/*
+WeaponDatabase weaponData = new WeaponDatabase();
+BungieAPIHandler bungieAPI = new BungieAPIHandler("");
 
+dynamic? itemRequested = bungieAPI.getWeaponManifest("814876684");
+
+if(itemRequested != null)
+{
+    Console.WriteLine(itemRequested.Response.displayProperties.name);
+}
+else
+{
+    Console.WriteLine("No item found");
+}
+*/
 /*
 weaponData.AddNewWeapon(2, "Weapon2", "Shotgun", "Void", 1210);
 weaponData.AddNewWeapon(3, "Weapon3", "Shotgun", "Solar", 1001);
@@ -14,6 +28,10 @@ weaponData.AddNewWeapon(9, "Weapon9", "Bow", "Arc", 1050);
 weaponData.AddNewWeapon(10, "Weapon10", "Bow", "Strand", 1300);
 weaponData.AddNewWeapon(11, "Weapon11", "SMG", "Stasis", 1200);
 */
+
+BungieAPIHandler bungieAPI = new BungieAPIHandler("");
+Weapon wishEnder = new Weapon(814876684, bungieAPI);
+Console.WriteLine(wishEnder.weaponId + " : " + wishEnder.weaponName + " : " + wishEnder.weaponElement + " : " + wishEnder.weaponLevel + " : " + wishEnder.weaponIconLink);
 
 var builder = WebApplication.CreateBuilder(args);
 
