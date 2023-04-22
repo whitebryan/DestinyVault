@@ -1,31 +1,50 @@
 using DestinyVaultSorter;
+using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json.Nodes;
 
-/*
 WeaponDatabase weaponData = new WeaponDatabase();
 
-weaponData.AddNewWeapon(2, "Weapon2", "Shotgun", "Void", 1210);
-weaponData.AddNewWeapon(3, "Weapon3", "Shotgun", "Solar", 1001);
-weaponData.AddNewWeapon(4, "Weapon4", "Shotgun", "Arc", 1050);
-weaponData.AddNewWeapon(5, "Weapon5", "Shotgun", "Strand", 1300);
-weaponData.AddNewWeapon(6, "Weapon6", "Shotgun", "Stasis", 1200);
-weaponData.AddNewWeapon(7, "Weapon7", "Sniper", "Arc", 1210);
-weaponData.AddNewWeapon(8, "Weapon8", "Sniper", "Arc", 1050);
-weaponData.AddNewWeapon(9, "Weapon9", "Bow", "Arc", 1050);
-weaponData.AddNewWeapon(10, "Weapon10", "Bow", "Strand", 1300);
-weaponData.AddNewWeapon(11, "Weapon11", "SMG", "Stasis", 1200);
-*/
+//Pulling Settings from file or from user input
+BungieAPISettings settings = new BungieAPISettings();
+var folder = Environment.SpecialFolder.LocalApplicationData;
+var path = Environment.GetFolderPath(folder);
+string settingsPath = System.IO.Path.Join(path, "vaultSettings.txt");
+if(File.Exists(settingsPath))
+{
+    settings = JsonConvert.DeserializeObject<BungieAPISettings>(File.ReadAllText(settingsPath));
+}
+else
+{
+    Console.WriteLine("Please enter your API key : ");
+    settings.APIKey = Console.ReadLine();
+    Console.WriteLine("Please enter your client_ID : ");
+    settings.client_ID = Console.ReadLine();
+    Console.WriteLine("Please enter your client_secret: ");
+    settings.client_secret = Console.ReadLine();
 
-//Opens OAuthpage then redirects to my github page with the code in the url
-//Process.Start(new ProcessStartInfo("https://www.bungie.net/en/oauth/authorize?client_id=CLIENT_ID&response_type=code") { UseShellExecute = true });
+    Console.WriteLine("Authorize in the opened web page then save the code at the end of url to enter as the AUTH CODE");
+    //Opens OAuthpage then redirects to my github page with the code in the url
+    Process.Start(new ProcessStartInfo("https://www.bungie.net/en/oauth/authorize?client_id=" + settings.client_ID + "&response_type=code") { UseShellExecute = true });
+    Console.WriteLine("Please enter the auth code you got from the redirect : ");
+    settings.authCode = Console.ReadLine();
 
-BungieAPIHandler bungieAPI = new BungieAPIHandler();
+    if (settings.APIKey == null || settings.client_ID == null || settings.client_secret == null || settings.authCode == null)
+    {
+        throw new Exception("These settings cannot be null");
+    }
+    else
+    {
+        FileStream settingsFile = File.Create(settingsPath);
+        settingsFile.Close();
+        string jsonString = JsonConvert.SerializeObject(settings);
+        File.WriteAllText(settingsPath, jsonString);
+    }
+}
 
-//bungieAPI.addAuthorization();
-dynamic? testInv = bungieAPI.getPlayerWeapons();
-Console.WriteLine(testInv.Response.inventory.data.items);
-
+BungieAPIHandler bungieAPI = new BungieAPIHandler(settings);
+bungieAPI.getAllOwnedWeapons();
 
 /*
 var builder = WebApplication.CreateBuilder(args);

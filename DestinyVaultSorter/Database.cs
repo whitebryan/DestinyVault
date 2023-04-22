@@ -57,7 +57,7 @@ namespace DestinyVaultSorter
         public WeaponDatabase(string dbName)
         {
             myDatabase = new WeaponContext(dbName);
-            bungieAPI = new BungieAPIHandler();
+            //bungieAPI = new BungieAPIHandler();
         }
 
         private WeaponContext myDatabase;

@@ -4,17 +4,54 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using RestSharp;
 using Newtonsoft.Json;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace DestinyVaultSorter
 {
+    public class BungieAPISettings
+    {
+        public string APIKey { get; set; } 
+        public string client_ID { get; set; }
+        public string client_secret { get; set;}
+        public string authCode { get; set; }
+        public string? authKey { get; set; }
+        public string? membershipID { get; set; }
+        public string? membershipType { get; set; }
+        public List<string> characterIDs = new List<string>();
+    }
+
+
     public class BungieAPIHandler
     {
-        HttpClient client;
-        private string APIKey = "";
-        public BungieAPIHandler()
+        private BungieAPISettings mySettings;
+        RestClient client;
+        public BungieAPIHandler(BungieAPISettings settings)
         {
-            client = new HttpClient();
-            client.DefaultRequestHeaders.Add("X-API-Key", APIKey);
+            client = new RestClient("https://www.bungie.net/");
+            client.AddDefaultHeader("X-API-Key", settings.APIKey);
+            mySettings = settings;
+
+            if (mySettings.authKey != null)
+            {
+                client.AddDefaultHeader("Authorization", "Bearer " + settings.authKey);
+            }
+            else
+            {
+                addAuthorization();
+            }
+        }
+        
+        public void getAllOwnedWeapons()
+        {
+            foreach(string charID in mySettings.characterIDs)
+            {
+                dynamic? curCharWeps = getCharacterWeapons(charID);
+
+                //later do this multi threaded
+                sortInventory(curCharWeps.Response.inventory.data.items);
+                return;
+            }
         }
 
         public void addAuthorization()
@@ -24,49 +61,112 @@ namespace DestinyVaultSorter
             request.Method = Method.Post;
             request.AddHeader("content-type", "application/x-www-form-urlencoded");
 
-            var postData = "client_id=CLIENT_ID&client_secret=CLIENT_SECRET&grant_type=authorization_code&code=CODE_HERE";
+            var postData = String.Format($"client_id={mySettings.client_ID}&client_secret={mySettings.client_secret}&grant_type=authorization_code&code={mySettings.authCode}");
             request.AddParameter("application/x-www-form-urlencoded", postData, ParameterType.RequestBody);
             RestResponse response = authClient.Execute(request);
             dynamic? item = JsonConvert.DeserializeObject(response.Content);
-            Console.WriteLine(response.Content);
 
             if (item != null)
             {
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + item.access_code);
+                //Adding auth header
+                string access_code = item.access_token;
+                client.AddDefaultHeader("Authorization", "Bearer " + access_code);
+                mySettings.authKey = access_code;
+                saveSettings();
             }
-        }
 
-        public void removeAuthorization()
-        {
-            client.DefaultRequestHeaders.Remove("Authorization");
+            getAccountIDs();
         }
 
         public dynamic? getWeaponManifest(string wepRefId)
         {
-            var response = client.GetAsync("https://www.bungie.net//Platform/Destiny2/Manifest/DestinyInventoryItemDefinition/" + wepRefId + "/").Result;
-            var content  = response.Content.ReadAsStringAsync().Result;
-            dynamic? item = JsonConvert.DeserializeObject(content);
+            string requestString = "Platform/Destiny2/Manifest/DestinyInventoryItemDefinition/" + wepRefId + "/";
+            RestRequest request = new RestRequest(requestString); 
+            RestResponse response = client.Execute(request);
+            dynamic? item = JsonConvert.DeserializeObject(response.Content);
             return item;
         }
 
-        public dynamic? getPlayerWeapons()
+        public void getAccountIDs()
         {
-            //addAuthorization();
-            // /3/ = membership type
-            // /4611686018470941199/ = destiny membership id
-            // /2305843009301268998/ = character id
-            var inventoryResponse = client.GetAsync("https://www.bungie.net/Platform/Destiny2/3/Profile/4611686018470941199/Character/2305843009301268998/?components=201").Result;
-            var inventoryContent = inventoryResponse.Content.ReadAsStringAsync().Result;
-            dynamic? inventory = JsonConvert.DeserializeObject(inventoryContent);
+            if (mySettings.characterIDs.Count != 0)
+                return;
 
-            Console.WriteLine(inventoryContent);
-            Console.WriteLine(inventory);
+            RestRequest request = new RestRequest("/Platform/User/GetMembershipsForCurrentUser/");
+            RestResponse response = client.Execute(request);
+            dynamic? responseJson = JsonConvert.DeserializeObject(response.Content);
 
-            return inventory;
+            if(responseJson != null)
+            {
+                //Getting memebershipID and type which can then be used to get character IDs
+                mySettings.membershipID = responseJson.Response.primaryMembershipId;
+                mySettings.membershipType = responseJson.Response.destinyMemberships[0].membershipType;
 
+                RestRequest characterIDRequest = new RestRequest("/Platform/Destiny2/3/Profile/4611686018470941199/?components=200");
+                RestResponse characterResponse = client.Execute(characterIDRequest);
+                dynamic? characterIDs = JsonConvert.DeserializeObject(characterResponse.Content);
+
+                if(characterIDs != null)
+                {
+                    foreach(var charID in characterIDs.Response.characters.data)
+                    {
+                        mySettings.characterIDs.Add(charID.Name);
+                        Console.WriteLine(charID.Name);
+                    }
+                }
+
+                saveSettings();
+            }
+        }
+
+        public dynamic? getCharacterWeapons(string charID)
+        {
             //1498876634 kinetic weapons
             //2465295065 energy weapons
             //953998645 power weapons
+            string requestString = String.Format($"/Platform/Destiny2/{mySettings.membershipType}/Profile/{mySettings.membershipID}/Character/{charID}/?components=201");
+            RestRequest request = new RestRequest(requestString);
+            RestResponse response = client.Execute(request);
+            dynamic? inventory = JsonConvert.DeserializeObject(response.Content);
+
+            Console.WriteLine(requestString);
+            return inventory;
+        }
+
+        public void sortInventory(dynamic invetory)
+        {
+            if(invetory == null)
+            {
+                return;
+            }
+            else
+            {
+                foreach(var item in invetory)
+                {
+                    //item.itemHash
+                    //item.itemInstanceId                  memID                  instanceID
+                    ///Platform/Destiny2/3/Profile/4611686018470941199/Item/6917529892396675415/?components=300
+                    //bucketHash for inventory bucket
+                    //instanceID for wepID
+                    //damage type hash for element
+                    //primary stat for level
+
+                    //getMAnifest for wepName, element, icon
+                    Console.WriteLine(item);
+                    //Console.WriteLine(item.itemHash);
+                    //request data on this 
+                    return;
+                }
+            }
+        }
+
+        public void saveSettings()
+        {
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var path = Environment.GetFolderPath(folder);
+            string settingsPath = System.IO.Path.Join(path, "vaultSettings.txt");
+            string jsonString = JsonConvert.SerializeObject(mySettings);
+            File.WriteAllText(settingsPath, jsonString);
         }
     }
 }
