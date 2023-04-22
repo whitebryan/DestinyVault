@@ -48,16 +48,16 @@ namespace DestinyVaultSorter
 
     public class WeaponDatabase
     {
-        public WeaponDatabase() 
+        public WeaponDatabase()
         {
             myDatabase = new WeaponContext();
-            bungieAPI = new BungieAPIHandler("");//Remove API key before pushing to github
+            //bungieAPI = new BungieAPIHandler();
         }
 
-        public WeaponDatabase(string dbName, string APIKey)
+        public WeaponDatabase(string dbName)
         {
             myDatabase = new WeaponContext(dbName);
-            bungieAPI = new BungieAPIHandler(APIKey);
+            bungieAPI = new BungieAPIHandler();
         }
 
         private WeaponContext myDatabase;

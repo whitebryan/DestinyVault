@@ -1,22 +1,10 @@
 using DestinyVaultSorter;
+using System.Diagnostics;
 using System.Text.Json.Nodes;
 
 /*
 WeaponDatabase weaponData = new WeaponDatabase();
-BungieAPIHandler bungieAPI = new BungieAPIHandler("");
 
-dynamic? itemRequested = bungieAPI.getWeaponManifest("814876684");
-
-if(itemRequested != null)
-{
-    Console.WriteLine(itemRequested.Response.displayProperties.name);
-}
-else
-{
-    Console.WriteLine("No item found");
-}
-*/
-/*
 weaponData.AddNewWeapon(2, "Weapon2", "Shotgun", "Void", 1210);
 weaponData.AddNewWeapon(3, "Weapon3", "Shotgun", "Solar", 1001);
 weaponData.AddNewWeapon(4, "Weapon4", "Shotgun", "Arc", 1050);
@@ -29,10 +17,17 @@ weaponData.AddNewWeapon(10, "Weapon10", "Bow", "Strand", 1300);
 weaponData.AddNewWeapon(11, "Weapon11", "SMG", "Stasis", 1200);
 */
 
-BungieAPIHandler bungieAPI = new BungieAPIHandler("");
-Weapon wishEnder = new Weapon(814876684, bungieAPI);
-Console.WriteLine(wishEnder.weaponId + " : " + wishEnder.weaponName + " : " + wishEnder.weaponElement + " : " + wishEnder.weaponLevel + " : " + wishEnder.weaponIconLink);
+//Opens OAuthpage then redirects to my github page with the code in the url
+//Process.Start(new ProcessStartInfo("https://www.bungie.net/en/oauth/authorize?client_id=CLIENT_ID&response_type=code") { UseShellExecute = true });
 
+BungieAPIHandler bungieAPI = new BungieAPIHandler();
+
+//bungieAPI.addAuthorization();
+dynamic? testInv = bungieAPI.getPlayerWeapons();
+Console.WriteLine(testInv.Response.inventory.data.items);
+
+
+/*
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -59,4 +54,4 @@ app.MapControllerRoute(
 app.MapFallbackToFile("index.html");
 
 app.Run();
-
+*/
