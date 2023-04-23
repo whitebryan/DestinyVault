@@ -43,10 +43,20 @@ else
     }
 }
 
-BungieAPIHandler bungieAPI = new BungieAPIHandler(settings);
-bungieAPI.getAllOwnedWeapons();
+//BungieAPIHandler bungieAPI = new BungieAPIHandler(settings, weaponData);
+//bungieAPI.reset();
+//bungieAPI.getAllOwnedWeapons();
 
-/*
+
+List<Weapon> allWeps = weaponData.databaseSearch("Arc",null, 1700);
+
+foreach (Weapon weapon in allWeps)
+{
+    Console.WriteLine($"{weapon.weaponName}    {weapon.weaponElement}    {weapon.weaponType}     {weapon.weaponLevel}");
+}
+
+Console.WriteLine(weaponData.getWeaponCount());
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -73,4 +83,4 @@ app.MapControllerRoute(
 app.MapFallbackToFile("index.html");
 
 app.Run();
-*/
+

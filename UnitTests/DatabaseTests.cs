@@ -12,8 +12,8 @@ namespace UnitTests
             weaponDatabase.clearDatabase();
 
 
-            weaponDatabase.AddNewWeapon(200, "TestWeapon", "Shotgun", "Arc", 1000);
-            weaponDatabase.AddNewWeapon(201, "TestWeapon1", "Shotgun", "Arc", 1000);
+            weaponDatabase.AddNewWeapon(new Weapon("200", "TestWeapon", "Shotgun", "Arc", 1000, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("201", "TestWeapon1", "Shotgun", "Arc", 1000, "", "Kinetic"));
 
             weaponDatabase.clearDatabase();
             var results = weaponDatabase.databaseSearch();
@@ -27,9 +27,9 @@ namespace UnitTests
             WeaponDatabase weaponDatabase = new WeaponDatabase("unitTesting");
             weaponDatabase.clearDatabase();
 
-            weaponDatabase.AddNewWeapon(200, "TestWeapon", "Shotgun", "Arc", 1000);
+            weaponDatabase.AddNewWeapon(new Weapon("200", "TestWeapon", "Shotgun", "Arc", 1000, "", "Kinetic"));
 
-            Weapon testWeapon = new Weapon(200, "TestWeapon", "Shotgun", "Arc", 1000);
+            Weapon testWeapon = new Weapon("200", "TestWeapon", "Shotgun", "Arc", 1000, "", "Kinetic");
             var results = weaponDatabase.databaseSearch();
 
             Assert.IsTrue(results.Count() == 1, "More than one weapon");
@@ -42,22 +42,22 @@ namespace UnitTests
             WeaponDatabase weaponDatabase = new WeaponDatabase("unitTesting");
             weaponDatabase.clearDatabase();
 
-            weaponDatabase.AddNewWeapon(200, "TestWeapon0", "Shotgun", "Arc", 1000);
-            weaponDatabase.AddNewWeapon(201, "TestWeapon1", "SMG", "Arc", 1000);
-            weaponDatabase.AddNewWeapon(202, "TestWeapon2", "Shotgun", "Stasis", 1000);
+            weaponDatabase.AddNewWeapon(new Weapon("200", "TestWeapon0", "Shotgun", "Arc", 1000, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("201", "TestWeapon1", "SMG", "Arc", 1000, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("202", "TestWeapon2", "Shotgun", "Stasis", 1000, "","Kinetic"));
 
-            weaponDatabase.RemoveWeapon(201);
+            weaponDatabase.RemoveWeapon("201");
 
             List<Weapon> results = weaponDatabase.databaseSearch();
 
-            Weapon testWeapon1 = new Weapon(200, "TestWeapon0", "Shotgun", "Arc", 1000);
-            Weapon testWeapon2 = new Weapon(202, "TestWeapon2", "Shotgun", "Stasis", 1000);
+            Weapon testWeapon1 = new Weapon("200", "TestWeapon0", "Shotgun", "Arc", 1000, "", "Kinetic");
+            Weapon testWeapon2 = new Weapon("202", "TestWeapon2", "Shotgun", "Stasis", 1000, "", "Kinetic");
 
             bool wrongItemDeleted = results.Contains(testWeapon1) && results.Contains(testWeapon2);
 
             Assert.IsTrue(results.Count() == 2, "Didn't remove weapon");
             Assert.IsFalse(wrongItemDeleted, "Removed wrong weapon");
-            Assert.IsFalse(results.Contains(new Weapon(201, "TestWeapon1", "SMG", "Arc", 1000)), "Weapon didn't remove");
+            Assert.IsFalse(results.Contains(new Weapon("201", "TestWeapon1", "SMG", "Arc", 1000, "", "Kinetic")), "Weapon didn't remove");
         }
 
         [TestMethod]
@@ -66,14 +66,14 @@ namespace UnitTests
             WeaponDatabase weaponDatabase = new WeaponDatabase("unitTesting");
             weaponDatabase.clearDatabase();
 
-            weaponDatabase.AddNewWeapon(200, "TestWeapon0", "Shotgun", "Arc", 1000);
-            weaponDatabase.AddNewWeapon(201, "TestWeapon1", "SMG", "Arc", 1500);
-            weaponDatabase.AddNewWeapon(202, "TestWeapon2", "Sniper", "Void", 1100);
-            weaponDatabase.AddNewWeapon(203, "TestWeapon3", "Sniper", "Stasis", 1200);
-            weaponDatabase.AddNewWeapon(206, "TestWeapon6", "Sniper", "Stasis", 1300);
-            weaponDatabase.AddNewWeapon(204, "TestWeapon4", "Bow", "Void", 1200);
-            weaponDatabase.AddNewWeapon(205, "TestWeapon5", "Bow", "Solar", 1900);
-            weaponDatabase.AddNewWeapon(207, "TestWeapon7", "Grenade Launcher", "Solar", 1000);
+            weaponDatabase.AddNewWeapon(new Weapon("200", "TestWeapon0", "Shotgun", "Arc", 1000, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("201", "TestWeapon1", "SMG", "Arc", 1500, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("202", "TestWeapon2", "Sniper", "Void", 1100, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("203", "TestWeapon3", "Sniper", "Stasis", 1200, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("206", "TestWeapon6", "Sniper", "Stasis", 1300, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("204", "TestWeapon4", "Bow", "Void", 1200, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("205", "TestWeapon5", "Bow", "Solar", 1900, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("207", "TestWeapon7", "Grenade Launcher", "Solar", 1000, "", "Kinetic"));
 
             var noParams = weaponDatabase.getWeaponCount();
             var oneParam = weaponDatabase.getWeaponCount("Stasis");
@@ -95,15 +95,15 @@ namespace UnitTests
             WeaponDatabase weaponDatabase = new WeaponDatabase("unitTesting");
             weaponDatabase.clearDatabase();
 
-            weaponDatabase.AddNewWeapon(200, "TestWeapon0", "Shotgun", "Arc", 1000);
-            weaponDatabase.AddNewWeapon(201, "TestWeapon1", "SMG", "Arc", 1500);
-            weaponDatabase.AddNewWeapon(202, "TestWeapon2", "Sniper", "Void", 1100);
-            weaponDatabase.AddNewWeapon(203, "TestWeapon3", "Sniper", "Stasis", 1200);
-            weaponDatabase.AddNewWeapon(206, "TestWeapon6", "Sniper", "Stasis", 1300);
-            weaponDatabase.AddNewWeapon(208, "TestWeapon8", "Sniper", "Arc", 1200);
-            weaponDatabase.AddNewWeapon(204, "TestWeapon4", "Bow", "Void", 1200);
-            weaponDatabase.AddNewWeapon(205, "TestWeapon5", "Bow", "Solar", 1900);
-            weaponDatabase.AddNewWeapon(207, "TestWeapon7", "Grenade Launcher", "Solar", 1000);
+            weaponDatabase.AddNewWeapon(new Weapon("200", "TestWeapon0", "Shotgun", "Arc", 1000, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("201", "TestWeapon1", "SMG", "Arc", 1500, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("202", "TestWeapon2", "Sniper", "Void", 1100, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("203", "TestWeapon3", "Sniper", "Stasis", 1200, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("206", "TestWeapon6", "Sniper", "Stasis", 1300, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("208", "TestWeapon8", "Sniper", "Arc", 1200, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("204", "TestWeapon4", "Bow", "Void", 1200, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("205", "TestWeapon5", "Bow", "Solar", 1900, "", "Kinetic"));
+            weaponDatabase.AddNewWeapon(new Weapon("207", "TestWeapon7", "Grenade Launcher", "Solar", 1000, "", "Kinetic"));
 
             List<Weapon> noParams = weaponDatabase.databaseSearch();
             List<Weapon> oneParam = weaponDatabase.databaseSearch("Stasis");
@@ -134,7 +134,7 @@ namespace UnitTests
                 }
             }
 
-            Weapon testWeapon = new Weapon(206, "TestWeapon6", "Sniper", "Stasis", 1300);
+            Weapon testWeapon = new Weapon("206", "TestWeapon6", "Sniper", "Stasis", 1300, "", "Kinetic");
             Assert.IsTrue(threeParams.Count() == 1, "Didn't return correct amount of weapons with three params");
             Assert.IsTrue(threeParams[0].weaponName == testWeapon.weaponName && threeParams[0].weaponElement == testWeapon.weaponElement && threeParams[0].weaponType == testWeapon.weaponType && threeParams[0].weaponLevel == testWeapon.weaponLevel, "Wrong weapon returned for three params");
         }

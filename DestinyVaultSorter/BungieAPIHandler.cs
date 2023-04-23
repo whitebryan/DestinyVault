@@ -24,13 +24,15 @@ namespace DestinyVaultSorter
 
     public class BungieAPIHandler
     {
+        private WeaponDatabase database;
         private BungieAPISettings mySettings;
         RestClient client;
-        public BungieAPIHandler(BungieAPISettings settings)
+        public BungieAPIHandler(BungieAPISettings settings, WeaponDatabase database)
         {
             client = new RestClient("https://www.bungie.net/");
             client.AddDefaultHeader("X-API-Key", settings.APIKey);
             mySettings = settings;
+            this.database = database;
 
             if (mySettings.authKey != null)
             {
@@ -44,14 +46,22 @@ namespace DestinyVaultSorter
         
         public void getAllOwnedWeapons()
         {
+            if(database.getWeaponCount() > 0)
+            {
+                database.clearDatabase();
+            }
+
             foreach(string charID in mySettings.characterIDs)
             {
                 dynamic? curCharWeps = getCharacterWeapons(charID);
 
-                //later do this multi threaded
+                //later do it multithreaded maybe
                 sortInventory(curCharWeps.Response.inventory.data.items);
-                return;
             }
+
+            //Grab vault items
+            dynamic? vaultWeps = getVaultWeapons();
+            sortInventory(vaultWeps.Response.profileInventory.data.items);
         }
 
         public void addAuthorization()
@@ -111,7 +121,6 @@ namespace DestinyVaultSorter
                     foreach(var charID in characterIDs.Response.characters.data)
                     {
                         mySettings.characterIDs.Add(charID.Name);
-                        Console.WriteLine(charID.Name);
                     }
                 }
 
@@ -121,43 +130,119 @@ namespace DestinyVaultSorter
 
         public dynamic? getCharacterWeapons(string charID)
         {
-            //1498876634 kinetic weapons
-            //2465295065 energy weapons
-            //953998645 power weapons
             string requestString = String.Format($"/Platform/Destiny2/{mySettings.membershipType}/Profile/{mySettings.membershipID}/Character/{charID}/?components=201");
             RestRequest request = new RestRequest(requestString);
             RestResponse response = client.Execute(request);
             dynamic? inventory = JsonConvert.DeserializeObject(response.Content);
-
-            Console.WriteLine(requestString);
             return inventory;
         }
 
-        public void sortInventory(dynamic invetory)
+        public dynamic? getVaultWeapons()
         {
-            if(invetory == null)
+            RestRequest request = new RestRequest($"/Platform/Destiny2/{mySettings.membershipType}/Profile/{mySettings.membershipID}/?components=102,307");
+            RestResponse response = client.Execute(request);   
+            dynamic? vaultInv = JsonConvert.DeserializeObject(response.Content);
+            return vaultInv;
+        }
+
+        public async void sortInventory(dynamic inventory)
+        {
+            if(inventory == null)
             {
                 return;
             }
             else
             {
-                foreach(var item in invetory)
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                int apiCallsCount = 0;
+                foreach(var item in inventory)
                 {
-                    //item.itemHash
-                    //item.itemInstanceId                  memID                  instanceID
-                    ///Platform/Destiny2/3/Profile/4611686018470941199/Item/6917529892396675415/?components=300
-                    //bucketHash for inventory bucket
-                    //instanceID for wepID
-                    //damage type hash for element
-                    //primary stat for level
+                    //Check to make sure its actually a weapon
+                    string bucketHash = item.bucketHash;
+                    string weaponHash = item.itemHash;
+                    if (bucketTypeHashToString(bucketHash) == "Invalid")
+                        continue;
 
-                    //getMAnifest for wepName, element, icon
-                    Console.WriteLine(item);
-                    //Console.WriteLine(item.itemHash);
-                    //request data on this 
-                    return;
+                    TimeSpan curSpan = stopwatch.Elapsed;
+                    apiCallsCount += 2;
+
+                    //Getting name, icon, and element
+                    dynamic? wepManifest = getWeaponManifest(weaponHash);
+
+                    bucketHash = wepManifest.Response.inventory.bucketTypeHash;
+                    if (wepManifest == null)
+                    {
+                        Console.WriteLine($"wepManifest : {wepManifest == null}");
+                        continue;
+                    }
+                    else if (bucketTypeHashToString(bucketHash) == "Invalid")
+                        continue;
+
+                    //bucketHash for inventory bucket ADD LATER
+                    //Getting stats on weapon
+                    RestRequest request = new RestRequest($"Platform/Destiny2/{mySettings.membershipType}/Profile/{mySettings.membershipID}/Item/{item.itemInstanceId}/?components=300");
+                    RestResponse response = client.Execute(request);
+                    dynamic? stats = JsonConvert.DeserializeObject(response.Content);
+
+                    Weapon curWeapon = new Weapon();
+                    curWeapon.weaponId = item.itemInstanceId;
+                    curWeapon.weaponName = wepManifest.Response.displayProperties.name;
+                    curWeapon.weaponType = wepManifest.Response.itemTypeDisplayName;
+                    curWeapon.weaponElement = damageHashToString((string)stats.Response.instance.data.damageTypeHash);
+                    curWeapon.weaponLevel = stats.Response.instance.data.primaryStat.value;
+                    curWeapon.weaponIconLink = wepManifest.Response.displayProperties.icon;
+                    //curWeapon.weaponSlot = bucketTypeHashToString(wepManifest.Response.inventory.bucketTypeHash);
+
+                    database.AddNewWeapon(curWeapon);
+
+                    //Limiting api calls to about 100 every 5 seconds
+                    if(apiCallsCount >= 100 && stopwatch.Elapsed.TotalSeconds >= 5)
+                    {
+                        int waitTime = System.Math.Clamp((int)(10 - stopwatch.Elapsed.TotalSeconds), 0, 10);
+                        await Task.Delay(waitTime * 1000);
+                        apiCallsCount = 0;
+                        stopwatch.Restart();
+                    }
                 }
             }
+        }
+
+        public string damageHashToString(string damageHash)
+        {
+            switch (damageHash)
+            {
+                case "3373582085":
+                    return "Kinetic";
+                case "3949783978":
+                    return "Strand";
+                case "3454344768":
+                    return "Void";
+                case "2303181850":
+                    return "Arc";
+                case "1847026933":
+                    return "Solar";
+                case "151347233":
+                    return "Stasis";
+            }
+
+            return "Invalid";
+        }
+
+        public string bucketTypeHashToString(string bucketTypeHash)
+        {
+            switch (bucketTypeHash)
+            {
+                case "1498876634":
+                    return "Kinetic";
+                case "2465295065":
+                    return "Elemental";
+                case "953998645":
+                    return "Heavy";
+                case "138197802":
+                    return "Vault";
+            }
+
+            return "Invalid";
         }
 
         public void saveSettings()
@@ -167,6 +252,14 @@ namespace DestinyVaultSorter
             string settingsPath = System.IO.Path.Join(path, "vaultSettings.txt");
             string jsonString = JsonConvert.SerializeObject(mySettings);
             File.WriteAllText(settingsPath, jsonString);
+        }
+
+        public void reset()
+        {
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var path = Environment.GetFolderPath(folder);
+            string settingsPath = System.IO.Path.Join(path, "vaultSettings.txt");
+            File.Delete(settingsPath);
         }
     }
 }

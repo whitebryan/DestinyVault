@@ -32,16 +32,11 @@ namespace DestinyVaultSorter
         [Route("/weapons/icon/{weaponID}")]
         public string getWeaponIconLink(string weaponID)
         {
-            int weaponIDNum = Int32.Parse(weaponID);
-            if (weaponIDNum > 0)
+            Weapon foundWeapon = myDatabase.getWeaponById(weaponID);
+            if(foundWeapon != null)
             {
-                Weapon foundWeapon = myDatabase.getWeaponById(weaponIDNum);
-                if(foundWeapon != null)
-                {
-                    return foundWeapon.weaponIconLink;
-                }
+                return foundWeapon.weaponIconLink;
             }
-
             return "null";
         }
     }
@@ -51,17 +46,14 @@ namespace DestinyVaultSorter
         public WeaponDatabase()
         {
             myDatabase = new WeaponContext();
-            //bungieAPI = new BungieAPIHandler();
         }
 
         public WeaponDatabase(string dbName)
         {
             myDatabase = new WeaponContext(dbName);
-            //bungieAPI = new BungieAPIHandler();
         }
 
         private WeaponContext myDatabase;
-        public BungieAPIHandler bungieAPI;
         public void AddNewWeapon(Weapon weaponToAdd)
         {
             myDatabase.Add(weaponToAdd);
@@ -76,7 +68,7 @@ namespace DestinyVaultSorter
             }
         }
 
-        public void RemoveWeapon(int id) 
+        public void RemoveWeapon(string id) 
         {
             Weapon? wepToRemove = myDatabase.Find<Weapon>(id);
 
@@ -144,7 +136,7 @@ namespace DestinyVaultSorter
             //return myDatabase.Weapons.Where(b => b.weaponId > 0).ToArray();
         }
 
-        public Weapon? getWeaponById(int id) 
+        public Weapon? getWeaponById(string id) 
         {
             return myDatabase.Find<Weapon>(id);
         }
