@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Button from './components/RoundButton'
@@ -26,7 +26,7 @@ function App() {
 }
 
 async function populateWeapons() {
-    const resposne = await fetch("weapons/search/");
+    const resposne = await fetch("weapons/search?weaponSlot=Heavy");
     const data = await resposne.json();
     return data;
 }

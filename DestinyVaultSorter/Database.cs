@@ -15,17 +15,17 @@ namespace DestinyVaultSorter
         private WeaponDatabase myDatabase = new WeaponDatabase();
 
         [HttpGet]
-        [Route("/weapons/search/{weaponElement?}/{weaponType?}/{weaponLevel:int?}")]
-        public List<Weapon> weaponSearch([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null)
+        [Route("/weapons/search/{weaponElement?}/{weaponType?}/{weaponLevel:int?}/{weaponSlot?}")]
+        public List<Weapon> weaponSearch([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null, [FromQuery] string? weaponSlot = null)
         {
-            return myDatabase.databaseSearch(weaponElement, weaponType, weaponLevel);  
+            return myDatabase.databaseSearch(weaponElement, weaponType, weaponLevel, weaponSlot);  
         }
 
         [HttpGet]
         [Route("/weapons/count/{weaponElement?}/{weaponType?}/{weaponLevel:int?}")]
-        public int weapoonCount([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null)
+        public int weapoonCount([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null, [FromQuery] string? weaponSlot = null)
         {
-            return myDatabase.getWeaponCount(weaponElement, weaponType, weaponLevel);
+            return myDatabase.getWeaponCount(weaponElement, weaponType, weaponLevel, weaponSlot);
         }
 
         [HttpGet]
@@ -88,7 +88,7 @@ namespace DestinyVaultSorter
         }
 
 
-        public int getWeaponCount(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null)
+        public int getWeaponCount(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null, string? weaponSlot = null)
         {
             IQueryable<Weapon> query = myDatabase.Set<Weapon>();
 
@@ -107,11 +107,16 @@ namespace DestinyVaultSorter
                 query = query.Where(w => w.weaponLevel >= weaponLevel);
             }
 
+            if(weaponSlot != null)
+            {
+                query = query.Where(w => w.weaponSlot == weaponSlot);
+            }
+
             return query.Count();
         }
 
 
-        public List<Weapon> databaseSearch(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null)
+        public List<Weapon> databaseSearch(string? weaponElement = null, string? weaponType = null, int? weaponLevel = null, string? weaponSlot = null)
         {
             IQueryable<Weapon> query = myDatabase.Set<Weapon>();
 
@@ -130,10 +135,12 @@ namespace DestinyVaultSorter
                 query = query.Where(w => w.weaponLevel >= weaponLevel);
             }
 
+            if (weaponSlot != null)
+            {
+                query = query.Where(w => w.weaponSlot == weaponSlot);
+            }
+
             return query.ToList<Weapon>();
-            //return myDatabase.Weapons.Where(w => w.weaponId > 4).ToArray();
-            //return myDatabase.Weapons.FromSqlRaw($"SELECT weaponId FROM Weapons WHERE {columnName} {condition0} {condition1}").ToArray();
-            //return myDatabase.Weapons.Where(b => b.weaponId > 0).ToArray();
         }
 
         public Weapon? getWeaponById(string id) 

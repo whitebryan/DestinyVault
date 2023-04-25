@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json.Nodes;
 
+
 WeaponDatabase weaponData = new WeaponDatabase();
 
 //Pulling Settings from file or from user input
@@ -43,19 +44,13 @@ else
     }
 }
 
-//BungieAPIHandler bungieAPI = new BungieAPIHandler(settings, weaponData);
-//bungieAPI.reset();
-//bungieAPI.getAllOwnedWeapons();
 
-
-List<Weapon> allWeps = weaponData.databaseSearch("Arc",null, 1700);
-
-foreach (Weapon weapon in allWeps)
+BungieAPIHandler bungieAPI = new BungieAPIHandler(settings, weaponData);
+if(weaponData.getWeaponCount() == 0)//Grab all weapons and add to database if this is the first run
 {
-    Console.WriteLine($"{weapon.weaponName}    {weapon.weaponElement}    {weapon.weaponType}     {weapon.weaponLevel}");
+    Console.WriteLine("Grabbing all weapons from your account this may take a moment.");
+    bungieAPI.getAllOwnedWeapons();
 }
-
-Console.WriteLine(weaponData.getWeaponCount());
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,4 +78,3 @@ app.MapControllerRoute(
 app.MapFallbackToFile("index.html");
 
 app.Run();
-

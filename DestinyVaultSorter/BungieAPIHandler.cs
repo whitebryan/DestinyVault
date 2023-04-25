@@ -191,7 +191,7 @@ namespace DestinyVaultSorter
                     curWeapon.weaponElement = damageHashToString((string)stats.Response.instance.data.damageTypeHash);
                     curWeapon.weaponLevel = stats.Response.instance.data.primaryStat.value;
                     curWeapon.weaponIconLink = wepManifest.Response.displayProperties.icon;
-                    //curWeapon.weaponSlot = bucketTypeHashToString(wepManifest.Response.inventory.bucketTypeHash);
+                    curWeapon.weaponSlot = bucketTypeHashToString((string)wepManifest.Response.inventory.bucketTypeHash);
 
                     database.AddNewWeapon(curWeapon);
 
