@@ -32,7 +32,7 @@ namespace DestinyVaultSorter
         [Route("/weapons/icon/{weaponID}")]
         public string getWeaponIconLink(string weaponID)
         {
-            Weapon foundWeapon = myDatabase.getWeaponById(weaponID);
+            Weapon? foundWeapon = myDatabase.getWeaponById(weaponID);
             if(foundWeapon != null)
             {
                 return foundWeapon.weaponIconLink;

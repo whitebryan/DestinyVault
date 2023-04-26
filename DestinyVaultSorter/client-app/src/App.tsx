@@ -1,34 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Button from './components/RoundButton'
+
+import React from "react";
+import HomePage from './Pages/Home';
+import VaultPage from "./Pages/VaultPage";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>  
-        <Button
-          border='none'
-          color='pink'
-          height='150px'
-          onClick={() => populateWeapons()}
-          radius='50%'
-          width='150px'
-          children = "Weapons"
-          />
-      </header>
-    </div>
+      <Router>
+        <Routes>
+          <Route path="" element={<HomePage />} />
+          <Route path="/vault" element={<VaultPage />} />
+        </Routes>
+      </Router>
   );
-}
-
-async function populateWeapons() {
-    const resposne = await fetch("weapons/search?weaponSlot=Heavy");
-    const data = await resposne.json();
-    return data;
 }
 
 export default App;
