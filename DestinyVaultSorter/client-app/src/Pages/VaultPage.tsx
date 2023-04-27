@@ -1,76 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import {useTable} from "react-table";
 import logo from '../logo.svg';
 import '../App.css';
 import { Link } from 'react-router-dom';
-import Button from '../components/RoundButton'
+import Button from '../components/RoundButton';
+import WeaponTable from '../components/WeaponTable';
+import DropDown from '../components/DropDownMenu';
 
-interface Data{
-    icon: string;
-    name: string;
-    type: string;
-    element: string;
-    level: number;
-    slot: string;
-}
+let weaponTypes = [
+    "Any",
+    "Bow",
+    "Shotgun",
+    "Sniper",
+];
+
+let weaponElements = [
+    "Any",
+    "Kinetic",
+    "Arc",
+    "Solar",
+    "Void",
+    "Stasis",
+    "Strand",
+];
+
+let weaponSlots = [
+    "Any",
+    "Kinetic",
+    "Elemental",
+    "Heavy",
+];
 
 function VaultPage() {
-    const [data, setData] = useState<Data[]>([]);
 
-    let columns = React.useMemo(
-        () => [
-            {
-                Header: 'Icon',
-                accessor: 'wepIcon',
-                Cell: (tableProps: { row: { original: { wepIcon: string | undefined; }; }; }) => { return <img src={tableProps.row.original.wepIcon} width={60} alt='Player'/>}
-            },
-            {
-                Header: 'Name',
-                accessor: 'wepName',
-            },
-            {
-                Header: 'Type',
-                accessor: 'wepType',
-            },
-            {
-                Header: 'Element',
-                accessor: 'wepElement',
-            },
-            {
-                Header: 'Level',
-                accessor: 'wepLevel',
-            },
-            {
-                Header: 'Slot',
-                accessor: 'wepSlot',
-            },
-        ],
-        []
-    )
+    const [movePage, setPage] = useState(0);
+    const [type, setType] = useState("Any");
+    const [element, setElement] = useState("Any");
+    const [slot, setSlot] = useState("Any");
+    const [level, setLevel] = useState(0);
 
-    // @ts-ignore
-    let tableInstance = useTable({columns, data})
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = tableInstance
-
-    async function populateWeapons() {
-        const resposne = await fetch("weapons/search?weaponSlot=Heavy");
-        const wepData = await resposne.json();
-        addDataToTable(wepData)
-      }
-  
-    
-    function addDataToTable(wepData: any){
-      let newData: any = []
-      Object.keys(wepData).forEach(function(key) {
-          newData.push({wepIcon: "https://www.bungie.net"+wepData[key].weaponIconLink, wepName: wepData[key].weaponName, wepType: wepData[key].weaponType, wepElement: wepData[key].weaponElement, wepLevel: wepData[key].weaponLevel, wepSlot: wepData[key].weaponSlot});
-      })
-      setData(newData)
+    function changePage(direction: number){
+        setPage(direction);
     }
 
     return (
@@ -79,58 +49,28 @@ function VaultPage() {
           <img src={logo} className="App-logo" alt="logo" />
           <p>
             <Link to="/">Go Home.</Link>
-          </p>  
-          <table {...getTableProps()}>
-            <thead>
-                {
-                    headerGroups.map(headerGroup => (
-                        <tr {...headerGroup.getHeaderGroupProps()}>
-                            {
-                                headerGroup.headers.map(column => (
-                                    <th {...column.getHeaderProps()}>
-                                        {
-                                            column.render('Header')
-                                        }
-                                    </th>
-                                ))
-                            }
-                        </tr>
-                    ))
-                }      
-            </thead>      
-            <tbody {...getTableBodyProps()}>
-                {
-                    rows.map(row => {
-                        prepareRow(row)
-                        return (
-                            <tr {...row.getRowProps()}>
-                                {
-                                    row.cells.map(cell => {
-                                        return (
-                                            <td {...cell.getCellProps()}>
-                                                {
-                                                    cell.render('Cell')
-                                                }
-                                            </td>
-                                        )
-                                    })
-                                }
-                            </tr>
-                        )
-                    })
-                }
-            </tbody>
-          </table>
-
-          <Button
+          </p>
+          <Button border='none'
+            color='pink'
+            height='50px'
+            onClick={() => changePage(-1)}
+            radius='50%'
+            width='50px'
+            children = "Back"
+            />
+                      <Button
             border='none'
             color='pink'
-            height='150px'
-            onClick={() => populateWeapons()}
+            height='50px'
+            onClick={() => changePage(1)}
             radius='50%'
-            width='150px'
-            children = "Weapons"
+            width='50px'
+            children = "Forward"
             />
+            <DropDown options={weaponTypes} default={0} valueChange={setType} label='Weapon Type'/>
+            <DropDown options={weaponElements} default={0} valueChange={setElement} label='Weapon Element'/>
+            <DropDown options={weaponSlots} default={0} valueChange={setSlot} label='Weapon Slot'/>
+            <WeaponTable page={movePage} setPage={setPage} type={type} element={element} level={level} slot={slot}/>
         </header>
       </div>
     );
