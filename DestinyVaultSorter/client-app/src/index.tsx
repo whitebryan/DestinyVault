@@ -3,18 +3,13 @@ import ReactDOM from 'react-dom/client';
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import HomePage from './Pages/Home';
 import Vault from './Pages/VaultPage';
 
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomePage />
-  },
-  {
-    path: "/vault",
-    element: <Vault />
+    element: <Vault/>
   },
 ]);
 

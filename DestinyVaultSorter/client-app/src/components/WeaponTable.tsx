@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import {TableInstance, useTable} from "react-table";
+import {TableInstance, useTable} from "react-table"; //in the future use material UI tables
 
 interface tableProps{
     page: number,
@@ -8,6 +8,8 @@ interface tableProps{
     element: string,
     slot: string,
     level: number,
+    setCurPage: (curPage: number) => void,
+    setMaxPages: (maxPages: number) => void,
 }
 
 interface Data{
@@ -40,6 +42,8 @@ function WeaponTable(props: tableProps){
             setCurInd(newInd);
             props.setPage(0);
         }
+
+        props.setCurPage(curInd);
     }
 
     let columns = React.useMemo(
@@ -54,6 +58,10 @@ function WeaponTable(props: tableProps){
                 accessor: 'wepName',
             },
             {
+                Header: 'Slot',
+                accessor: 'wepSlot',
+            },
+            {
                 Header: 'Type',
                 accessor: 'wepType',
             },
@@ -64,10 +72,6 @@ function WeaponTable(props: tableProps){
             {
                 Header: 'Level',
                 accessor: 'wepLevel',
-            },
-            {
-                Header: 'Slot',
-                accessor: 'wepSlot',
             },
         ],
         []
@@ -90,21 +94,30 @@ function WeaponTable(props: tableProps){
         })
         setFullData(newData)
         setData(newData.slice(curInd, curInd+5))
+        props.setMaxPages(newData.length - 1);
     }
 
     async function populateWeapons() {
         let requestString = "weapons/search?"
-        if(props.type != "Any")
+        if(props.type !== "Any")
             requestString = requestString + "weaponType="+props.type+'&';
-        if(props.element != "Any")
+        if(props.element !== "Any")
             requestString = requestString + "weaponElement="+props.element+'&';
-        if(props.slot != "Any")
+        if(props.slot !== "Any")
             requestString = requestString + "weaponSlot="+props.slot+'&';
         if(props.level)
             requestString = requestString + "weaponLevel="+props.level+'&';
 
         const resposne = await fetch(requestString);
         const wepData = await resposne.json();
+
+        if(curInd > 0)
+        {
+            setCurInd(0);
+            props.setCurPage(0);
+            props.setPage(0);
+        }
+
         addDataToTable(wepData)
     }
 
@@ -162,7 +175,7 @@ function WeaponTable(props: tableProps){
                     })
                 }
             </tbody>
-          </table>  
+          </table> 
         </div>
     );
 }
