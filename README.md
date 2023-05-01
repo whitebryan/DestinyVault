@@ -6,4 +6,4 @@ Currently only local hosted using my bungie API key.
 
 Grabs your characters inventories and your vault then allows you to sort or search for weapons by type, element, level, slot, or name.
 
-Website end is currenlty unmade but the backend is mostly done
+Website frontend is made using MaterialUI components mainly
