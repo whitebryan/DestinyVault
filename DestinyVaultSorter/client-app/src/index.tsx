@@ -4,12 +4,17 @@ import {createBrowserRouter, RouterProvider} from 'react-router-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import Vault from './Pages/VaultPage';
+import PageNotFound from './Pages/NotFound';
 
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Vault/>
+  },
+  {
+    path:"*",
+    element: <PageNotFound/>
   },
 ]);
 

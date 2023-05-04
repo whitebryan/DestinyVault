@@ -11,9 +11,23 @@ import Typography from '@mui/material/Typography';
 
 let weaponTypes = [
     "Any",
-    "Bow",
+    "Hand Cannon",
+    "Auto Rifle",
+    "Submachine Gun",
+    "Combat Bow",
+    "Pulse Rifle",
+    "Scout Rifle",
+    "Sidearm",
     "Shotgun",
-    "Sniper",
+    "Trace Rifle",
+    "Grenade Launcher",
+    "Sniper Rifle",
+    "Fusion Rifle",
+    "Glaive",
+    "Sword",
+    "Machine Gun",
+    "Linear Fusion Rifle",
+    "Rocket Launcher",
 ];
 
 let weaponElements = [
