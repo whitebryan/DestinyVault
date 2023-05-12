@@ -22,7 +22,7 @@ namespace DestinyVaultSorter
         }
 
         [HttpGet]
-        [Route("/weapons/count/{weaponElement?}/{weaponType?}/{weaponLevel:int?}")]
+        [Route("/weapons/count/{weaponElement?}/{weaponType?}/{weaponLevel:int?}/{weaponSlot?}")]
         public int weapoonCount([FromQuery] string? weaponElement = null, [FromQuery] string? weaponType = null, [FromQuery] int? weaponLevel = null, [FromQuery] string? weaponSlot = null)
         {
             return myDatabase.getWeaponCount(weaponElement, weaponType, weaponLevel, weaponSlot);
